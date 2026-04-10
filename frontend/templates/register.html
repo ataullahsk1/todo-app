@@ -1,0 +1,119 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <meta name="description" content="Create a free TodoApp account to start managing your tasks with WhatsApp reminders."/>
+  <title>Register — TodoApp</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com"/>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet"/>
+  <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}"/>
+</head>
+<body class="auth-page">
+
+  <div class="bg-blob blob-1"></div>
+  <div class="bg-blob blob-2"></div>
+  <div class="bg-blob blob-3"></div>
+
+  <div class="auth-container">
+    <div class="brand">
+      <div class="brand-icon">✅</div>
+      <h1 class="brand-name">TodoApp</h1>
+      <p class="brand-tagline">Smart reminders. Zero missed tasks.</p>
+    </div>
+
+    <div class="card auth-card">
+      <h2 class="card-title">Create account</h2>
+      <p class="card-subtitle">Free forever · WhatsApp reminders included</p>
+
+      <div id="auth-message" class="message-box hidden"></div>
+
+      <form id="register-form" novalidate>
+        <!-- Full Name -->
+        <div class="form-group">
+          <label for="reg-name">Full Name</label>
+          <div class="input-wrapper">
+            <span class="input-icon">👤</span>
+            <input id="reg-name" type="text" name="name" placeholder="John Doe" required/>
+          </div>
+        </div>
+
+        <!-- Email -->
+        <div class="form-group">
+          <label for="reg-email">Email address</label>
+          <div class="input-wrapper">
+            <span class="input-icon">✉️</span>
+            <input id="reg-email" type="email" name="email" placeholder="you@example.com" required autocomplete="email"/>
+          </div>
+        </div>
+
+        <!-- WhatsApp Phone -->
+        <div class="form-group">
+          <label for="reg-phone">WhatsApp Number <span class="label-hint">(for reminders)</span></label>
+          <div class="input-wrapper">
+            <span class="input-icon">📱</span>
+            <input id="reg-phone" type="tel" name="phone" placeholder="+91 98765 43210"/>
+          </div>
+          <p class="field-note">Include country code, e.g. +91XXXXXXXXXX</p>
+        </div>
+
+        <!-- Password -->
+        <div class="form-group">
+          <label for="reg-password">Password</label>
+          <div class="input-wrapper">
+            <span class="input-icon">🔒</span>
+            <input id="reg-password" type="password" name="password" placeholder="Min 6 characters" required autocomplete="new-password"/>
+            <button type="button" class="toggle-pwd" onclick="togglePassword('reg-password', this)" aria-label="Toggle password visibility">👁</button>
+          </div>
+        </div>
+
+        <button id="reg-btn" type="submit" class="btn btn-primary btn-full">
+          <span class="btn-text">Create Account</span>
+          <span class="btn-spinner hidden"></span>
+        </button>
+      </form>
+
+      <p class="auth-switch">
+        Already have an account? <a href="/login">Sign in →</a>
+      </p>
+    </div>
+  </div>
+
+  <script src="{{ url_for('static', filename='js/main.js') }}"></script>
+  <script>
+    document.getElementById("register-form").addEventListener("submit", async (e) => {
+      e.preventDefault();
+      const btn  = document.getElementById("reg-btn");
+      const msg  = document.getElementById("auth-message");
+
+      const name     = document.getElementById("reg-name").value.trim();
+      const email    = document.getElementById("reg-email").value.trim();
+      const phone    = document.getElementById("reg-phone").value.trim();
+      const password = document.getElementById("reg-password").value;
+
+      setLoading(btn, true);
+      clearMessage(msg);
+
+      try {
+        const res  = await fetch("/auth/register", {
+          method : "POST",
+          headers: { "Content-Type": "application/json" },
+          body   : JSON.stringify({ name, email, phone, password }),
+        });
+        const data = await res.json();
+
+        if (data.success) {
+          showMessage(msg, `🎉 Account created! Welcome, ${data.name}! Redirecting…`, "success");
+          setTimeout(() => window.location.href = "/dashboard", 1200);
+        } else {
+          showMessage(msg, data.message, "error");
+        }
+      } catch {
+        showMessage(msg, "Network error. Please try again.", "error");
+      } finally {
+        setLoading(btn, false);
+      }
+    });
+  </script>
+</body>
+</html>
